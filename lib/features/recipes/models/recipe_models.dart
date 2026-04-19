@@ -54,6 +54,22 @@ class RecipeDetail extends Recipe {
   });
 
   factory RecipeDetail.fromJson(Map<String, dynamic> json) {
+    // Spoonacular returns ingredients in 'extendedIngredients' or 'ingredients'
+    final rawIngredients = json['extendedIngredients'] as List<dynamic>? ?? 
+                           json['ingredients'] as List<dynamic>? ?? [];
+                           
+    // Spoonacular returns instructions as a single string (often HTML) or in analyzedInstructions
+    List<String> parsedInstructions = [];
+    if (json['instructions'] is String) {
+      // Split by newlines or just add as a single paragraph
+      parsedInstructions = [(json['instructions'] as String).replaceAll(RegExp(r'<[^>]*>'), '')]; // Strip simple HTML
+    } else if (json['instructions'] is List) {
+      parsedInstructions = (json['instructions'] as List).map((e) => e.toString()).toList();
+    } else if (json['analyzedInstructions'] is List && (json['analyzedInstructions'] as List).isNotEmpty) {
+      final steps = (json['analyzedInstructions'] as List)[0]['steps'] as List<dynamic>? ?? [];
+      parsedInstructions = steps.map((s) => s['step'].toString()).toList();
+    }
+
     return RecipeDetail(
       id: json['id'] as int,
       title: json['title'] as String,
@@ -63,15 +79,10 @@ class RecipeDetail extends Recipe {
       isSaved: json['isSaved'] as bool? ?? false,
       source: json['source'] as String?,
       summary: json['summary'] as String?,
-      ingredients: (json['ingredients'] as List<dynamic>?)
-              ?.map((e) =>
-                  RecipeIngredient.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          [],
-      instructions: (json['instructions'] as List<dynamic>?)
-              ?.map((e) => e.toString())
-              .toList() ??
-          [],
+      ingredients: rawIngredients
+          .map((e) => RecipeIngredient.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      instructions: parsedInstructions,
     );
   }
 }

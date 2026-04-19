@@ -28,62 +28,48 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final pantryState = ref.watch(pantryProvider);
 
     return Scaffold(
-      body: SafeArea(
-        child: IndexedStack(
-          index: _currentTab,
-          children: [
-            _DashboardHome(pantryState: pantryState),
-            const _PantryTabPlaceholder(),
-            const _RecipesTabPlaceholder(),
-            const _ProfileTabPlaceholder(),
-          ],
-        ),
+      body: IndexedStack(
+        index: _currentTab,
+        children: [
+          _DashboardHome(pantryState: pantryState),
+          const _PantryTabPlaceholder(),
+          const _RecipesTabPlaceholder(),
+          const _ProfileTabPlaceholder(),
+        ],
       ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 20,
-              offset: const Offset(0, -4),
-            ),
-          ],
-        ),
-        child: NavigationBar(
-          selectedIndex: _currentTab,
-          onDestinationSelected: (i) {
-            if (i == 1) { context.go('/pantry'); return; }
-            if (i == 2) { context.go('/recipes'); return; }
-            if (i == 3) { context.go('/profile'); return; }
-            setState(() => _currentTab = i);
-          },
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          indicatorColor: AppColors.primary.withValues(alpha: 0.12),
-          destinations: const [
-            NavigationDestination(
-              icon: Icon(Icons.home_outlined),
-              selectedIcon: Icon(Icons.home_rounded),
-              label: 'Home',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.kitchen_outlined),
-              selectedIcon: Icon(Icons.kitchen_rounded),
-              label: 'Pantry',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.restaurant_menu_outlined),
-              selectedIcon: Icon(Icons.restaurant_menu_rounded),
-              label: 'Recipes',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.person_outline_rounded),
-              selectedIcon: Icon(Icons.person_rounded),
-              label: 'Profile',
-            ),
-          ],
-        ),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _currentTab,
+        onDestinationSelected: (i) {
+          if (i == 1) { context.go('/pantry'); return; }
+          if (i == 2) { context.go('/recipes'); return; }
+          if (i == 3) { context.go('/profile'); return; }
+          setState(() => _currentTab = i);
+        },
+        backgroundColor: AppColors.surface,
+        elevation: 8,
+        indicatorColor: AppColors.primary.withValues(alpha: 0.12),
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home_rounded),
+            label: 'Home',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.kitchen_outlined),
+            selectedIcon: Icon(Icons.kitchen_rounded),
+            label: 'Pantry',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.restaurant_menu_outlined),
+            selectedIcon: Icon(Icons.restaurant_menu_rounded),
+            label: 'Recipes',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.person_outline_rounded),
+            selectedIcon: Icon(Icons.person_rounded),
+            label: 'Profile',
+          ),
+        ],
       ),
     );
   }
@@ -95,13 +81,18 @@ class _DashboardHome extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final topPadding = MediaQuery.paddingOf(context).top;
+    
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      padding: EdgeInsets.only(
+        top: topPadding + 32, // Simplified logic
+        left: 24,
+        right: 24,
+        bottom: 48,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 20),
-
           // Greeting
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -118,7 +109,7 @@ class _DashboardHome extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Your Kitchen',
+                    'Your Awesome Kitchen',
                     style: TextStyle(fontFamily: 'Matter', 
                       fontSize: 28,
                       fontWeight: FontWeight.w700,
