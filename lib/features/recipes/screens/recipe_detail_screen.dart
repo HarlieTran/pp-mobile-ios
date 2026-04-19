@@ -17,10 +17,7 @@ class RecipeDetailScreen extends ConsumerWidget {
     return Scaffold(
       body: recipeAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, stack) {
-          print('Error loading recipe: $e\n$stack');
-          return Center(child: Text('Error loading recipe'));
-        },
+        error: (e, _) => Center(child: Text('Error loading recipe')),
         data: (recipe) {
           return CustomScrollView(
             slivers: [

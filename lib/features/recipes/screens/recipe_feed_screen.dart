@@ -238,10 +238,7 @@ class _RecipeGrid extends StatelessWidget {
       itemBuilder: (context, i) {
         final recipe = recipes[i];
         return GestureDetector(
-          onTap: () {
-            print('Tapped recipe: ${recipe.id}');
-            context.push('/recipes/${recipe.id}');
-          },
+          onTap: () => context.go('/recipes/${recipe.id}'),
           child: Container(
             decoration: BoxDecoration(
               color: AppColors.surface,
