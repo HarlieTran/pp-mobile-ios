@@ -14,6 +14,7 @@ class PantryItem {
   final String? notes;
   final ExpiryStatus expiryStatus;
   final int? daysUntilExpiry;
+  final String category;
 
   const PantryItem({
     required this.id,
@@ -24,6 +25,7 @@ class PantryItem {
     this.notes,
     this.expiryStatus = ExpiryStatus.noDate,
     this.daysUntilExpiry,
+    this.category = 'Other',
   });
 
   factory PantryItem.fromJson(Map<String, dynamic> json) {
@@ -34,8 +36,9 @@ class PantryItem {
       unit: json['unit'] as String,
       expiryDate: json['expiryDate'] as String?,
       notes: json['notes'] as String?,
-      expiryStatus: _parseExpiryStatus(json['expiryStatus'] as String?),
+      expiryStatus: _parseExpiryStatus(json['status'] as String?),
       daysUntilExpiry: json['daysUntilExpiry'] as int?,
+      category: json['category'] as String? ?? 'Other',
     );
   }
 
@@ -108,10 +111,54 @@ class ParsedIngredient {
 
   factory ParsedIngredient.fromJson(Map<String, dynamic> json) {
     return ParsedIngredient(
-      name: json['name'] as String,
+      name: json['name']?.toString() ?? 'Unknown Item',
       quantity: json['quantity']?.toString() ?? '',
       unit: json['unit']?.toString() ?? '',
       category: json['category']?.toString() ?? '',
     );
+  }
+}
+
+class ExpiryHelper {
+  static String guessCategory(String name) {
+    final lowerName = name.toLowerCase();
+    final singular = lowerName.endsWith('ies') ? lowerName.substring(0, lowerName.length - 3) + 'y' 
+                   : lowerName.endsWith('es') ? lowerName.substring(0, lowerName.length - 2) 
+                   : lowerName.endsWith('s') ? lowerName.substring(0, lowerName.length - 1) 
+                   : lowerName;
+
+    final produce = ["tomato", "potato", "carrot", "cucumber", "onion", "garlic", "apple", "banana", "broccoli", "pepper", "spinach", "lettuce", "strawberry", "radish", "eggplant", "salad", "celery", "mushroom", "zucchini", "squash", "cabbage", "cauliflower", "asparagus", "corn", "bean", "pea", "grape", "orange", "lemon", "lime", "berry", "melon", "peach", "plum", "cherry", "avocado", "kale", "mango", "fruit", "pear", "kiwi", "pineapple"];
+    final dairy = ["milk", "egg", "cheese", "butter", "cream", "yogurt", "ghee", "kefir", "whey"];
+    final meat = ["beef", "chicken", "pork", "sausage", "ham", "bacon", "turkey", "tenderloin", "lamb", "veal", "duck", "venison", "prosciutto", "salami"];
+    final seafood = ["fish", "salmon", "tuna", "shrimp", "crab", "lobster", "scallop", "clam", "mussel", "oyster", "squid", "octopus", "cod", "halibut", "tilapia", "anchovy", "sardine"];
+    final spices = ["salt", "pepper", "parsley", "basil", "oregano", "cinnamon", "cumin", "spice", "herb", "thyme", "rosemary", "sage", "cilantro", "mint", "dill", "chive", "paprika", "nutmeg", "clove", "ginger", "turmeric", "saffron", "cardamom", "coriander"];
+    final condiments = ["oil", "vinegar", "mustard", "ketchup", "mayo", "sauce", "dressing", "sugar", "syrup", "honey", "jam", "jelly", "spread", "dip", "salsa", "relish", "soy", "teriyaki", "sriracha"];
+    
+    bool matches(List<String> keywords) => keywords.any((k) => lowerName.contains(k) || singular.contains(k));
+    
+    if (matches(produce)) return 'produce';
+    if (matches(dairy)) return 'dairy';
+    if (matches(meat)) return 'meat';
+    if (matches(seafood)) return 'seafood';
+    if (matches(spices)) return 'spices';
+    if (matches(condiments)) return 'condiments';
+    
+    return 'other';
+  }
+
+  static int getDefaultLifespanDays(String category) {
+    switch (category.toLowerCase()) {
+      case 'produce': return 14;
+      case 'condiments & oils':
+      case 'condiments': return 180;
+      case 'dairy & eggs':
+      case 'dairy': return 14;
+      case 'meat & poultry':
+      case 'meat': return 4;
+      case 'spices & herbs':
+      case 'spices': return 365;
+      case 'seafood': return 3;
+      default: return 30;
+    }
   }
 }

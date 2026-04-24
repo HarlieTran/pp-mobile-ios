@@ -25,20 +25,31 @@ class UserProfile {
   });
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
+    final prefProfile = json['preferenceProfile'] as Map<String, dynamic>?;
+    final dietSignals = prefProfile?['dietSignals'] as Map<String, dynamic>?;
+    final likesObj = prefProfile?['likes'] as Map<String, dynamic>?;
+    final dislikesObj = prefProfile?['dislikes'] as Map<String, dynamic>?;
+
     return UserProfile(
       displayName: json['displayName'] as String?,
       email: json['email'] as String?,
-      likes: json['likes'] as String?,
-      dietType: (json['dietType'] as List<dynamic>?)
+      likes: likesObj?['csv'] as String? ?? json['likes'] as String?,
+      dietType: (dietSignals?['dietType'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          (json['dietType'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
           [],
-      allergies: (json['allergies'] as List<dynamic>?)
+      allergies: (dietSignals?['allergies'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          (json['allergies'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
           [],
-      disliked: json['disliked'] as String?,
-      notes: json['notes'] as String?,
+      disliked: dislikesObj?['csv'] as String? ?? json['disliked'] as String?,
+      notes: dietSignals?['notes'] as String? ?? json['notes'] as String?,
       onboardingCompleted: json['onboardingCompleted'] as bool? ?? false,
     );
   }

@@ -15,12 +15,13 @@ class PlannerService {
   /// GET /meal-plan
   Future<MealPlan> fetchMealPlan() async {
     final response = await _dio.get('/meal-plan');
-    return MealPlan.fromJson(response.data as Map<String, dynamic>);
+    return MealPlan.fromJson(response.data);
   }
 
   /// POST /meal-plan/:id
-  Future<void> addRecipeToPlan(int recipeId) async {
-    await _dio.post('/meal-plan/$recipeId');
+  Future<void> addRecipeToPlan(int recipeId, {String? date}) async {
+    final data = date != null ? {'date': date} : null;
+    await _dio.post('/meal-plan/$recipeId', data: data);
   }
 
   /// POST /meal-plan/ai
@@ -36,5 +37,28 @@ class PlannerService {
   /// DELETE /meal-plan
   Future<void> clearPlan() async {
     await _dio.delete('/meal-plan');
+  }
+
+  // ── Planner Notes ──────────────────────────
+
+  /// GET /planner-notes → Map<date, text>
+  Future<Map<String, String>> fetchNotes() async {
+    final response = await _dio.get('/planner-notes');
+    final list = response.data as List<dynamic>;
+    final map = <String, String>{};
+    for (final item in list) {
+      map[item['date'] as String] = item['text'] as String;
+    }
+    return map;
+  }
+
+  /// PUT /planner-notes/:date
+  Future<void> upsertNote(String date, String text) async {
+    await _dio.put('/planner-notes/$date', data: {'text': text});
+  }
+
+  /// DELETE /planner-notes/:date
+  Future<void> deleteNote(String date) async {
+    await _dio.delete('/planner-notes/$date');
   }
 }

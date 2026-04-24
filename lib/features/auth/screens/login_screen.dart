@@ -14,39 +14,13 @@ class LoginScreen extends ConsumerStatefulWidget {
   ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends ConsumerState<LoginScreen>
-    with SingleTickerProviderStateMixin {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  late AnimationController _fadeController;
-  late Animation<double> _fadeAnimation;
-  late Animation<Offset> _slideAnimation;
   bool _obscurePassword = true;
 
   @override
-  void initState() {
-    super.initState();
-    _fadeController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1000),
-    );
-    _fadeAnimation = CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeOut,
-    );
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.12),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeOutCubic,
-    ));
-    _fadeController.forward();
-  }
-
-  @override
   void dispose() {
-    _fadeController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -63,15 +37,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: FadeTransition(
-          opacity: _fadeAnimation,
-          child: SlideTransition(
-            position: _slideAnimation,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 28),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
                   const SizedBox(height: 56),
 
                   // Logo + Brand
@@ -82,6 +52,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         'assets/images/app-logo.svg',
                         height: 32,
                         width: 32,
+                        colorFilter: const ColorFilter.mode(AppColors.primary, BlendMode.srcIn),
                       ),
                       const SizedBox(width: 8),
                       const Text(
@@ -91,7 +62,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                           fontSize: 20,
                           fontWeight: FontWeight.w600,
                           letterSpacing: 0.8,
-                          color: AppColors.foreground,
+                          color: AppColors.primary,
                         ),
                       ),
                     ],
@@ -233,42 +204,39 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                           _passwordController.text,
                         ),
                   ),
-                  const SizedBox(height: 12),
-
-                  // Secondary submit — matches auth-submit (outline)
-                  _AuthSubmitButton(
-                    label: 'Create Account',
-                    isPrimary: false,
-                    onTap: () => context.go('/signup'),
-                  ),
-                  const SizedBox(height: 32),
-
-                  // Support card
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: AppColors.secondary,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Text(
-                      'New to PantryPal? Create an account to start tracking your pantry, discovering recipes, and planning meals.',
-                      style: TextStyle(
-                        fontFamily: 'Matter',
-                        fontSize: 13,
-                        fontWeight: FontWeight.w400,
-                        height: 1.6,
-                        color: AppColors.textSecondary,
+                  const SizedBox(height: 20),
+                  // Don't have an account? Sign up
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        "Don't have an account? ",
+                        style: TextStyle(
+                          fontFamily: 'Matter',
+                          fontSize: 14,
+                          color: AppColors.textSecondary,
+                        ),
                       ),
-                    ),
+                      GestureDetector(
+                        onTap: () => context.go('/signup'),
+                        child: const Text(
+                          'Sign Up',
+                          style: TextStyle(
+                            fontFamily: 'Matter',
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 40),
                 ],
               ),
             ),
           ),
-        ),
-      ),
-    );
+        );
   }
 }
 

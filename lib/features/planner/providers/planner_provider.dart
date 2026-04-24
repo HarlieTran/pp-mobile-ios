@@ -29,8 +29,8 @@ class PlannerNotifier extends StateNotifier<AsyncValue<MealPlan>> {
     }
   }
 
-  Future<void> addRecipe(int recipeId) async {
-    await _service.addRecipeToPlan(recipeId);
+  Future<void> addRecipe(int recipeId, {String? date}) async {
+    await _service.addRecipeToPlan(recipeId, date: date);
     await fetchPlan(); // Refresh
   }
 
@@ -42,5 +42,60 @@ class PlannerNotifier extends StateNotifier<AsyncValue<MealPlan>> {
   Future<void> clearPlan() async {
     await _service.clearPlan();
     state = const AsyncValue.data(MealPlan());
+  }
+}
+
+// ── Planner Notes Provider ────────────────────
+
+final plannerNotesProvider =
+    StateNotifierProvider<PlannerNotesNotifier, Map<String, String>>(
+  (ref) => PlannerNotesNotifier(ref.read(plannerServiceProvider)),
+);
+
+class PlannerNotesNotifier extends StateNotifier<Map<String, String>> {
+  final PlannerService _service;
+
+  PlannerNotesNotifier(this._service) : super({});
+
+  Future<void> fetchNotes() async {
+    try {
+      final notes = await _service.fetchNotes();
+      state = notes;
+    } catch (_) {
+      // Keep current state on error
+    }
+  }
+
+  Future<void> saveNote(String date, String text) async {
+    // Optimistic update
+    final updated = Map<String, String>.from(state);
+    updated[date] = text;
+    state = updated;
+    try {
+      await _service.upsertNote(date, text);
+    } catch (_) {
+      // Rollback on error
+      final rollback = Map<String, String>.from(state);
+      rollback.remove(date);
+      state = rollback;
+    }
+  }
+
+  Future<void> deleteNote(String date) async {
+    final prev = state[date];
+    // Optimistic remove
+    final updated = Map<String, String>.from(state);
+    updated.remove(date);
+    state = updated;
+    try {
+      await _service.deleteNote(date);
+    } catch (_) {
+      // Rollback on error
+      if (prev != null) {
+        final rollback = Map<String, String>.from(state);
+        rollback[date] = prev;
+        state = rollback;
+      }
+    }
   }
 }

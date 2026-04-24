@@ -29,7 +29,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        errorMessage: e.toString(),
+        errorMessage: _cleanErrorMessage(e),
       );
     }
   }
@@ -42,7 +42,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        errorMessage: e.toString(),
+        errorMessage: _cleanErrorMessage(e),
       );
     }
   }
@@ -55,7 +55,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        errorMessage: e.toString(),
+        errorMessage: _cleanErrorMessage(e),
       );
     }
   }
@@ -68,5 +68,32 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> checkAuthStatus() async {
     final signedIn = await AuthService.instance.isSignedIn();
     state = state.copyWith(isAuthenticated: signedIn);
+  }
+
+  String _cleanErrorMessage(Object e) {
+    final str = e.toString();
+    if (str.contains('Missing required parameter USERNAME') || 
+        str.contains('Missing required parameter PASSWORD')) {
+      return 'Please enter your email and password.';
+    }
+    if (str.contains('UserNotFoundException')) {
+      return 'No account found with this email.';
+    }
+    if (str.contains('NotAuthorizedException')) {
+      return 'Incorrect email or password.';
+    }
+    if (str.contains('InvalidPasswordException')) {
+      return 'Password must be at least 8 characters.';
+    }
+    if (str.contains('UsernameExistsException')) {
+      return 'An account with this email already exists.';
+    }
+    // Attempt to extract the "message" from AWS Cognito exceptions
+    final match = RegExp(r'"message":\s*"([^"]+)"').firstMatch(str);
+    if (match != null) {
+      return match.group(1) ?? str;
+    }
+    // Fallback: remove the Exception prefix if present
+    return str.replaceAll(RegExp(r'^[a-zA-Z]+Exception \{\s*'), '').replaceAll(RegExp(r'\s*\}$'), '');
   }
 }

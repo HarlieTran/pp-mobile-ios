@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../providers/auth_provider.dart';
@@ -13,6 +14,8 @@ class SignupScreen extends ConsumerStatefulWidget {
 }
 
 class _SignupScreenState extends ConsumerState<SignupScreen> {
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
@@ -20,6 +23,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 
   @override
   void dispose() {
+    _firstNameController.dispose();
+    _lastNameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmController.dispose();
@@ -33,46 +38,135 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 28),
+          padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 24),
+              const SizedBox(height: 56),
 
-              // Back button
-              Align(
-                alignment: Alignment.centerLeft,
-                child: IconButton(
-                  onPressed: () => context.go('/login'),
-                  icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-                  style: IconButton.styleFrom(
-                    backgroundColor: AppColors.surfaceTint,
-                    padding: const EdgeInsets.all(10),
+              // Logo + Brand
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SvgPicture.asset(
+                    'assets/images/app-logo.svg',
+                    height: 32,
+                    width: 32,
+                    colorFilter: const ColorFilter.mode(AppColors.primary, BlendMode.srcIn),
                   ),
-                ),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'PantryPal',
+                    style: TextStyle(
+                      fontFamily: 'Matter',
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.8,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 48),
 
-              Text(
-                'Create Account',
-                style: TextStyle(fontFamily: 'Matter', 
-                  fontSize: 32,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+              // Eyebrow
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    height: 7,
+                    width: 7,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'GET STARTED',
+                    style: TextStyle(
+                      fontFamily: 'Matter',
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 1.2,
+                      color: AppColors.textMuted,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // Headline
+              const Text(
+                'Sign up for your\naccount',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'Matter',
+                  fontSize: 36,
+                  fontWeight: FontWeight.w500,
+                  height: 0.95,
+                  letterSpacing: -2.0,
+                  color: AppColors.foreground,
                 ),
               ),
-              const SizedBox(height: 8),
-              Text(
+              const SizedBox(height: 12),
+              const Text(
                 'Start managing your pantry smarter',
-                style: TextStyle(fontFamily: 'Matter', 
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'Matter',
                   fontSize: 16,
+                  fontWeight: FontWeight.w400,
+                  height: 1.5,
                   color: AppColors.textSecondary,
                 ),
               ),
               const SizedBox(height: 40),
 
+              // Name Row
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const _FieldLabel('First Name'),
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: _firstNameController,
+                          textCapitalization: TextCapitalization.words,
+                          decoration: const InputDecoration(
+                            hintText: 'Jane',
+                            prefixIcon: Icon(Icons.person_outline_rounded, size: 20),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const _FieldLabel('Last Name'),
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: _lastNameController,
+                          textCapitalization: TextCapitalization.words,
+                          decoration: const InputDecoration(
+                            hintText: 'Doe',
+                            prefixIcon: Icon(Icons.person_outline_rounded, size: 20),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+
               // Email
-              _FieldLabel('Email'),
+              const _FieldLabel('Email'),
               const SizedBox(height: 8),
               TextField(
                 controller: _emailController,
@@ -85,7 +179,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               const SizedBox(height: 20),
 
               // Password
-              _FieldLabel('Password'),
+              const _FieldLabel('Password'),
               const SizedBox(height: 8),
               TextField(
                 controller: _passwordController,
@@ -105,7 +199,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               const SizedBox(height: 20),
 
               // Confirm Password
-              _FieldLabel('Confirm Password'),
+              const _FieldLabel('Confirm Password'),
               const SizedBox(height: 8),
               TextField(
                 controller: _confirmController,
@@ -138,14 +232,18 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 child: ElevatedButton(
                   onPressed: authState.isLoading
                       ? null
-                      : () {
+                      : () async {
                           if (_passwordController.text != _confirmController.text) {
                             return;
                           }
-                          ref.read(authProvider.notifier).signUp(
+                          await ref.read(authProvider.notifier).signUp(
                                 _emailController.text.trim(),
                                 _passwordController.text,
                               );
+                          final state = ref.read(authProvider);
+                          if (state.errorMessage == null && context.mounted) {
+                            context.go('/verify-email', extra: _emailController.text.trim());
+                          }
                         },
                   child: authState.isLoading
                       ? const SizedBox(

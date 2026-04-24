@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../profile/providers/profile_provider.dart';
 import '../models/onboarding_models.dart';
 import '../providers/onboarding_provider.dart';
 import '../widgets/step_progress_indicator.dart';
@@ -30,7 +31,7 @@ class OnboardingScreen extends ConsumerWidget {
             final currentQuestion = questionList[currentStep];
 
             return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 28),
+              padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -102,38 +103,68 @@ class OnboardingScreen extends ConsumerWidget {
 
                   // Options
                   Expanded(
-                    child: ListView.separated(
-                      itemCount: currentQuestion.options.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
-                      itemBuilder: (context, index) {
-                        final option = currentQuestion.options[index];
-                        final currentAnswer =
-                            onboarding.answers[currentQuestion.key];
-                        final isSelected = currentAnswer?.optionValues
-                                ?.contains(option) ??
-                            false;
+                    child: currentQuestion.type == 'FREE_TEXT'
+                        ? Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: TextField(
+                              maxLines: 4,
+                              onChanged: (val) {
+                                ref.read(onboardingProvider.notifier).setAnswer(
+                                  OnboardingAnswer(
+                                    questionKey: currentQuestion.key,
+                                    answerText: val,
+                                  ),
+                                );
+                              },
+                              style: const TextStyle(fontFamily: 'Matter', fontSize: 16),
+                              decoration: InputDecoration(
+                                hintText: 'E.g., cilantro, mushrooms...',
+                                hintStyle: const TextStyle(fontFamily: 'Matter', color: AppColors.textHint),
+                                filled: true,
+                                fillColor: AppColors.surfaceTint,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                  borderSide: BorderSide.none,
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                  borderSide: const BorderSide(color: AppColors.primary),
+                                ),
+                              ),
+                            ),
+                          )
+                        : ListView.separated(
+                            itemCount: currentQuestion.options.length,
+                            separatorBuilder: (_, __) => const SizedBox(height: 12),
+                            itemBuilder: (context, index) {
+                              final option = currentQuestion.options[index];
+                              final currentAnswer =
+                                  onboarding.answers[currentQuestion.key];
+                              final isSelected = currentAnswer?.optionValues
+                                      ?.contains(option.value) ??
+                                  false;
 
-                        return _OptionTile(
-                          label: option,
-                          isSelected: isSelected,
-                          onTap: () {
-                            final existing = List<String>.from(
-                                currentAnswer?.optionValues ?? []);
-                            if (isSelected) {
-                              existing.remove(option);
-                            } else {
-                              existing.add(option);
-                            }
-                            ref
-                                .read(onboardingProvider.notifier)
-                                .setAnswer(OnboardingAnswer(
-                                  questionKey: currentQuestion.key,
-                                  optionValues: existing,
-                                ));
-                          },
-                        );
-                      },
-                    ),
+                              return _OptionTile(
+                                label: option.label,
+                                isSelected: isSelected,
+                                onTap: () {
+                                  final existing = List<String>.from(
+                                      currentAnswer?.optionValues ?? []);
+                                  if (isSelected) {
+                                    existing.remove(option.value);
+                                  } else {
+                                    existing.add(option.value);
+                                  }
+                                  ref
+                                      .read(onboardingProvider.notifier)
+                                      .setAnswer(OnboardingAnswer(
+                                        questionKey: currentQuestion.key,
+                                        optionValues: existing,
+                                      ));
+                                },
+                              );
+                            },
+                          ),
                   ),
                   const SizedBox(height: 20),
 
@@ -150,7 +181,10 @@ class OnboardingScreen extends ConsumerWidget {
                                 ref
                                     .read(onboardingProvider.notifier)
                                     .submit()
-                                    .then((_) => context.go('/'));
+                                    .then((_) {
+                                  ref.read(profileProvider.notifier).fetchProfile();
+                                  context.go('/');
+                                });
                               }
                             },
                       child: onboarding.isSubmitting
@@ -229,12 +263,14 @@ class _OptionTile extends StatelessWidget {
                   : null,
             ),
             const SizedBox(width: 14),
-            Text(
-              label,
-              style: TextStyle(fontFamily: 'Matter', 
-                fontSize: 15,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                color: AppColors.textPrimary,
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(fontFamily: 'Matter', 
+                  fontSize: 15,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                  color: AppColors.textPrimary,
+                ),
               ),
             ),
           ],

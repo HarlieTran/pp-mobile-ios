@@ -16,10 +16,10 @@ import '../models/recipe_models.dart';
 class RecipesService {
   final _dio = ApiClient.instance.dio;
 
-  /// POST /recipes/suggestions
-  Future<List<Recipe>> fetchSuggestions({int limit = 12}) async {
+  Future<List<Recipe>> fetchSuggestions({int limit = 12, String filter = 'All'}) async {
     final response = await _dio.post('/recipes/suggestions', data: {
       'limit': limit,
+      if (filter != 'All') 'filter': filter,
     });
     final list = (response.data['recipes'] ?? response.data) as List<dynamic>;
     return list
@@ -46,25 +46,29 @@ class RecipesService {
 
   /// POST /recipes/from-name
   Future<RecipeDetail> generateFromName(String name,
-      {int targetServings = 4}) async {
+      {int targetServings = 4, String? imageUrl, List<String>? ingredientHint}) async {
     final response = await _dio.post('/recipes/from-name', data: {
       'name': name,
       'targetServings': targetServings,
+      if (imageUrl != null) 'imageUrl': imageUrl,
+      if (ingredientHint != null) 'ingredientHint': ingredientHint,
     });
     return RecipeDetail.fromJson(response.data as Map<String, dynamic>);
   }
 
   /// POST /recipes/generate-list
-  Future<List<Recipe>> generateFromIngredients(
+  Future<List<AiRecipe>> generateFromIngredients(
       List<Map<String, String>> ingredients) async {
     final response = await _dio.post('/recipes/generate-list', data: {
       'ingredients': ingredients,
     });
     final list = response.data['recipes'] as List<dynamic>;
     return list
-        .map((r) => Recipe.fromJson(r as Map<String, dynamic>))
+        .map((r) => AiRecipe.fromJson(r as Map<String, dynamic>))
         .toList();
   }
+
+
 
   /// POST /recipes/generate-image
   Future<String> generateImage(String title, String description) async {

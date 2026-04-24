@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../recipes/providers/recipes_provider.dart';
 
@@ -14,37 +16,58 @@ class FavouritesScreen extends ConsumerWidget {
     final savedAsync = ref.watch(savedRecipesProvider);
 
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+      backgroundColor: AppColors.background,
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.only(
+              top: MediaQuery.of(context).padding.top + 24,
+              bottom: 24,
+              left: 24,
+              right: 24,
+            ),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: const Border(
+                  bottom: BorderSide(color: Color(0xFFF1F5F9), width: 1),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.02),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
                     onPressed: () => context.pop(),
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+                    icon: const Icon(LucideIcons.chevronLeft, size: 24),
                     style: IconButton.styleFrom(
-                      backgroundColor: AppColors.surfaceTint,
+                      backgroundColor: const Color(0xFFF8FAFC),
+                      foregroundColor: AppColors.textPrimary,
                       padding: const EdgeInsets.all(10),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                   ),
                   Text(
                     'Saved Recipes',
-                    style: TextStyle(fontFamily: 'Matter', 
-                      fontSize: 22,
+                    style: GoogleFonts.outfit(
+                      fontSize: 20,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
+                      color: AppColors.primary,
                     ),
                   ),
-                  const SizedBox(width: 40),
+                  const SizedBox(width: 44),
                 ],
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 8),
 
             // Content
             Expanded(
@@ -52,7 +75,7 @@ class FavouritesScreen extends ConsumerWidget {
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (e, _) => Center(
                   child: Text('Failed to load favourites',
-                      style: TextStyle(fontFamily: 'Matter', color: AppColors.textHint)),
+                      style: GoogleFonts.outfit(color: AppColors.textHint)),
                 ),
                 data: (recipes) {
                   if (recipes.isEmpty) {
@@ -60,18 +83,18 @@ class FavouritesScreen extends ConsumerWidget {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.bookmark_outline_rounded,
+                          Icon(LucideIcons.bookmark,
                               size: 64, color: AppColors.textHint.withValues(alpha: 0.5)),
                           const SizedBox(height: 16),
                           Text(
                             'No saved recipes yet',
-                            style: TextStyle(fontFamily: 'Matter', 
-                                fontSize: 16, color: AppColors.textHint),
+                            style: GoogleFonts.outfit(
+                                fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
                           ),
                           const SizedBox(height: 8),
                           Text(
                             'Tap the bookmark icon on any recipe to save it',
-                            style: TextStyle(fontFamily: 'Matter', 
+                            style: GoogleFonts.outfit(
                                 fontSize: 14, color: AppColors.textHint),
                           ),
                         ],
@@ -80,11 +103,11 @@ class FavouritesScreen extends ConsumerWidget {
                   }
 
                   return GridView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    padding: const EdgeInsets.all(24),
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
-                      crossAxisSpacing: 14,
-                      mainAxisSpacing: 14,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
                       childAspectRatio: 0.75,
                     ),
                     itemCount: recipes.length,
@@ -94,36 +117,76 @@ class FavouritesScreen extends ConsumerWidget {
                         onTap: () => context.go('/recipes/${recipe.id}'),
                         child: Container(
                           decoration: BoxDecoration(
-                            color: AppColors.surface,
-                            borderRadius: BorderRadius.circular(16),
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(24),
+                            border: Border.all(color: AppColors.border),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.05),
-                                blurRadius: 12,
+                                color: Colors.black.withValues(alpha: 0.02),
+                                blurRadius: 8,
                                 offset: const Offset(0, 4),
                               ),
                             ],
                           ),
-                          clipBehavior: Clip.antiAlias,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               // Image
                               Expanded(
                                 flex: 3,
-                                child: recipe.imageUrl != null
-                                    ? CachedNetworkImage(
-                                        imageUrl: recipe.imageUrl!,
-                                        width: double.infinity,
-                                        fit: BoxFit.cover,
-                                      )
-                                    : Container(
-                                        color: AppColors.surfaceTint,
-                                        child: const Center(
-                                          child: Icon(Icons.restaurant,
-                                              color: AppColors.textHint),
+                                child: Container(
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF8FAFC),
+                                    borderRadius: const BorderRadius.only(
+                                      topLeft: Radius.circular(23),
+                                      topRight: Radius.circular(23),
+                                    ),
+                                  ),
+                                  clipBehavior: Clip.antiAlias,
+                                  child: Stack(
+                                    fit: StackFit.expand,
+                                    children: [
+                                      recipe.imageUrl != null
+                                          ? CachedNetworkImage(
+                                              imageUrl: recipe.imageUrl!,
+                                              fit: BoxFit.cover,
+                                            )
+                                          : const Center(
+                                              child: Icon(LucideIcons.chefHat, color: AppColors.textHint),
+                                            ),
+                                      Positioned(
+                                        top: 8,
+                                        right: 8,
+                                        child: GestureDetector(
+                                          onTap: () async {
+                                            await ref.read(recipesServiceProvider).toggleSave(recipe.id);
+                                            ref.invalidate(savedRecipesProvider);
+                                          },
+                                          child: Container(
+                                            padding: const EdgeInsets.all(6),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              shape: BoxShape.circle,
+                                              border: Border.all(color: Colors.green, width: 1.5),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.black.withValues(alpha: 0.1),
+                                                  blurRadius: 4,
+                                                ),
+                                              ],
+                                            ),
+                                            child: const Icon(
+                                              LucideIcons.heart,
+                                              size: 18,
+                                              color: Colors.green, // Heart filled green for saved
+                                            ),
+                                          ),
                                         ),
                                       ),
+                                    ],
+                                  ),
+                                ),
                               ),
                               // Info
                               Expanded(
@@ -135,30 +198,45 @@ class FavouritesScreen extends ConsumerWidget {
                                     children: [
                                       Text(
                                         recipe.title,
-                                        style: TextStyle(fontFamily: 'Matter', 
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w600,
+                                        style: GoogleFonts.outfit(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w700,
                                           color: AppColors.textPrimary,
                                         ),
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                       const Spacer(),
-                                      if (recipe.readyInMinutes != null)
-                                        Row(
-                                          children: [
-                                            const Icon(Icons.schedule_rounded,
-                                                size: 14, color: AppColors.textHint),
-                                            const SizedBox(width: 4),
-                                            Text(
-                                              '${recipe.readyInMinutes} min',
-                                              style: TextStyle(fontFamily: 'Matter', 
-                                                fontSize: 12,
-                                                color: AppColors.textHint,
-                                              ),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          if (recipe.readyInMinutes != null)
+                                            Row(
+                                              children: [
+                                                const Icon(LucideIcons.clock, size: 12, color: AppColors.textSecondary),
+                                                const SizedBox(width: 4),
+                                                Text(
+                                                  '${recipe.readyInMinutes}m',
+                                                  style: GoogleFonts.outfit(
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.w500,
+                                                    color: AppColors.textSecondary,
+                                                  ),
+                                                ),
+                                              ],
+                                            )
+                                          else
+                                            const SizedBox.shrink(),
+                                          Container(
+                                            padding: const EdgeInsets.all(6),
+                                            decoration: const BoxDecoration(
+                                              color: Color(0xFFF1F5F9),
+                                              shape: BoxShape.circle,
                                             ),
-                                          ],
-                                        ),
+                                            child: const Icon(LucideIcons.arrowRight, size: 12, color: AppColors.textHint),
+                                          ),
+                                        ],
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -174,7 +252,6 @@ class FavouritesScreen extends ConsumerWidget {
             ),
           ],
         ),
-      ),
     );
   }
 }

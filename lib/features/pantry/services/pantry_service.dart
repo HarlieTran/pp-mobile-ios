@@ -70,9 +70,12 @@ class PantryService {
     final plainDio = Dio(); // No interceptors for direct S3 upload
     await plainDio.put(
       presignedUrl,
-      data: bytes,
+      data: Stream.fromIterable([bytes]),
       options: Options(
-        headers: {'Content-Type': contentType},
+        headers: {
+          'Content-Type': contentType,
+          Headers.contentLengthHeader: bytes.length,
+        },
       ),
     );
   }

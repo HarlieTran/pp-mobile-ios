@@ -31,8 +31,8 @@ class ProfileNotifier extends StateNotifier<AsyncValue<UserProfile>> {
 
   Future<void> updateProfile(UpdateProfilePayload payload) async {
     try {
-      final updated = await _service.updateProfile(payload);
-      state = AsyncValue.data(updated);
+      await _service.updateProfile(payload);
+      await fetchProfile();
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }

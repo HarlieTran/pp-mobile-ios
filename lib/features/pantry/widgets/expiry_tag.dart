@@ -19,10 +19,13 @@ class ExpiryTag extends StatelessWidget {
     final (color, label) = switch (status) {
       ExpiryStatus.expired => (AppColors.expiryExpired, 'Expired'),
       ExpiryStatus.expiringSoon => (
-          AppColors.expirySoon,
-          '${daysUntilExpiry}d left'
+          (daysUntilExpiry != null && daysUntilExpiry! <= 2) ? AppColors.expiryExpired : AppColors.expirySoon,
+          daysUntilExpiry != null ? '${daysUntilExpiry}d left' : 'Expiring soon'
         ),
-      ExpiryStatus.fresh => (AppColors.expiryFresh, 'Fresh'),
+      ExpiryStatus.fresh => (
+          AppColors.expiryFresh,
+          daysUntilExpiry != null ? '${daysUntilExpiry}d left' : 'Fresh'
+        ),
       ExpiryStatus.noDate => (AppColors.textHint, 'No date'),
     };
 

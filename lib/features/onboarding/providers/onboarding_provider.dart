@@ -1,6 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/onboarding_models.dart';
 import '../services/onboarding_service.dart';
+import '../../profile/models/profile_models.dart';
+import '../../profile/services/profile_service.dart';
+import '../../profile/providers/profile_provider.dart';
 
 /// ──────────────────────────────────────────────
 /// Onboarding Provider
@@ -44,13 +47,14 @@ class OnboardingState {
 
 final onboardingProvider =
     StateNotifierProvider<OnboardingNotifier, OnboardingState>(
-  (ref) => OnboardingNotifier(ref.read(onboardingServiceProvider)),
+  (ref) => OnboardingNotifier(ref.read(onboardingServiceProvider), ref.read(profileServiceProvider)),
 );
 
 class OnboardingNotifier extends StateNotifier<OnboardingState> {
   final OnboardingService _service;
+  final ProfileService _profileService;
 
-  OnboardingNotifier(this._service) : super(const OnboardingState());
+  OnboardingNotifier(this._service, this._profileService) : super(const OnboardingState());
 
   void setAnswer(OnboardingAnswer answer) {
     final updated = Map<String, OnboardingAnswer>.from(state.answers);
@@ -65,6 +69,17 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
     state = state.copyWith(isSubmitting: true);
     try {
       await _service.saveAnswers(state.answers.values.toList());
+
+      final dietType = state.answers['dietary_preference']?.optionValues?.where((e) => e != 'none').toList() ?? [];
+      final allergies = state.answers['allergies']?.optionValues ?? [];
+      final disliked = state.answers['dislikes']?.answerText;
+
+      await _profileService.updateProfile(UpdateProfilePayload(
+        dietType: dietType,
+        allergies: allergies,
+        disliked: disliked,
+      ));
+
       await _service.completeOnboarding();
       state = state.copyWith(isSubmitting: false, isCompleted: true);
     } catch (_) {
