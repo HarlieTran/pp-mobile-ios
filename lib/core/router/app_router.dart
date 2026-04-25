@@ -24,29 +24,14 @@ import '../../features/profile/screens/preferences_screen.dart';
 import '../../features/profile/screens/favourites_screen.dart';
 import 'shell_scaffold.dart';
 
-CustomTransitionPage _fadeSlideTransition(Widget child) {
+CustomTransitionPage _fadeTransition(Widget child) {
   return CustomTransitionPage(
     child: child,
-    transitionDuration: const Duration(milliseconds: 600),
+    transitionDuration: const Duration(milliseconds: 300),
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      final fadeAnimation = CurvedAnimation(
-        parent: animation,
-        curve: Curves.easeOut,
-      );
-      final slideAnimation = Tween<Offset>(
-        begin: const Offset(0, 0.12),
-        end: Offset.zero,
-      ).animate(CurvedAnimation(
-        parent: animation,
-        curve: Curves.easeOutCubic,
-      ));
-
       return FadeTransition(
-        opacity: fadeAnimation,
-        child: SlideTransition(
-          position: slideAnimation,
-          child: child,
-        ),
+        opacity: CurveTween(curve: Curves.easeInOut).animate(animation),
+        child: child,
       );
     },
   );
@@ -70,7 +55,7 @@ GoRouter appRouter(WidgetRef ref) {
         '/onboarding',
       ];
       if (!authed && !publicPaths.contains(state.matchedLocation)) {
-        return '/splash';
+        return '/login';
       }
       if (authed && state.matchedLocation == '/login') {
         return '/';
@@ -81,25 +66,25 @@ GoRouter appRouter(WidgetRef ref) {
       // ── Public routes ──
       GoRoute(
         path: '/splash',
-        pageBuilder: (_, __) => _fadeSlideTransition(const SplashScreen()),
+        pageBuilder: (_, __) => _fadeTransition(const SplashScreen()),
       ),
       GoRoute(
         path: '/login',
-        pageBuilder: (_, __) => _fadeSlideTransition(const LoginScreen()),
+        pageBuilder: (_, __) => _fadeTransition(const LoginScreen()),
       ),
       GoRoute(
         path: '/signup',
-        pageBuilder: (_, __) => _fadeSlideTransition(const SignupScreen()),
+        pageBuilder: (_, __) => _fadeTransition(const SignupScreen()),
       ),
       GoRoute(
         path: '/verify-email',
-        pageBuilder: (_, state) => _fadeSlideTransition(
+        pageBuilder: (_, state) => _fadeTransition(
           VerifyEmailScreen(email: state.extra as String? ?? ''),
         ),
       ),
       GoRoute(
         path: '/onboarding',
-        pageBuilder: (_, __) => _fadeSlideTransition(const OnboardingScreen()),
+        pageBuilder: (_, __) => _fadeTransition(const OnboardingScreen()),
       ),
 
       // ── Main app shell ──
@@ -108,19 +93,19 @@ GoRouter appRouter(WidgetRef ref) {
         routes: [
           GoRoute(
             path: '/',
-            pageBuilder: (_, __) => _fadeSlideTransition(const HomeTab()),
+            pageBuilder: (_, __) => _fadeTransition(const HomeTab()),
           ),
           GoRoute(
             path: '/pantry',
-            pageBuilder: (_, __) => _fadeSlideTransition(const PantryScreen()),
+            pageBuilder: (_, __) => _fadeTransition(const PantryScreen()),
             routes: [
               GoRoute(
                 path: 'scan',
-                pageBuilder: (_, __) => _fadeSlideTransition(const ScanScreen()),
+                pageBuilder: (_, __) => _fadeTransition(const ScanScreen()),
                 routes: [
                   GoRoute(
                     path: 'review',
-                    pageBuilder: (_, state) => _fadeSlideTransition(
+                    pageBuilder: (_, state) => _fadeTransition(
                       ScanReviewScreen(
                         items: state.extra as List<ParsedIngredient>,
                       ),
@@ -132,17 +117,17 @@ GoRouter appRouter(WidgetRef ref) {
           ),
           GoRoute(
             path: '/recipes',
-            pageBuilder: (_, __) => _fadeSlideTransition(const RecipeFeedScreen()),
+            pageBuilder: (_, __) => _fadeTransition(const RecipeFeedScreen()),
             routes: [
               GoRoute(
                 path: 'ai-chef',
-                pageBuilder: (_, state) => _fadeSlideTransition(
+                pageBuilder: (_, state) => _fadeTransition(
                   AiChefScreen(initialQuery: state.extra as String?),
                 ),
               ),
               GoRoute(
                 path: ':id',
-                pageBuilder: (_, state) => _fadeSlideTransition(
+                pageBuilder: (_, state) => _fadeTransition(
                   RecipeDetailScreen(
                     recipeId: int.parse(state.pathParameters['id']!),
                   ),
@@ -150,7 +135,7 @@ GoRouter appRouter(WidgetRef ref) {
                 routes: [
                   GoRoute(
                     path: 'cook',
-                    pageBuilder: (_, state) => _fadeSlideTransition(
+                    pageBuilder: (_, state) => _fadeTransition(
                       CookScreen(
                         recipe: state.extra as RecipeDetail,
                       ),
@@ -162,19 +147,19 @@ GoRouter appRouter(WidgetRef ref) {
           ),
           GoRoute(
             path: '/profile-details',
-            pageBuilder: (_, __) => _fadeSlideTransition(const ProfileDetailsScreen()),
+            pageBuilder: (_, __) => _fadeTransition(const ProfileDetailsScreen()),
           ),
           GoRoute(
             path: '/preferences',
-            pageBuilder: (_, __) => _fadeSlideTransition(const PreferencesScreen()),
+            pageBuilder: (_, __) => _fadeTransition(const PreferencesScreen()),
           ),
           GoRoute(
             path: '/favourites',
-            pageBuilder: (_, __) => _fadeSlideTransition(const FavouritesScreen()),
+            pageBuilder: (_, __) => _fadeTransition(const FavouritesScreen()),
           ),
           GoRoute(
             path: '/planner',
-            pageBuilder: (_, __) => _fadeSlideTransition(const PlannerScreen()),
+            pageBuilder: (_, __) => _fadeTransition(const PlannerScreen()),
           ),
         ],
       ),

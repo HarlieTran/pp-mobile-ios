@@ -590,7 +590,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                                           ),
                                           const SizedBox(width: 8),
                                           Text(
-                                            '4 items in stock', // Mocked as requested
+                                            '${recipe.usedIngredientCount ?? 0} item${(recipe.usedIngredientCount ?? 0) == 1 ? '' : 's'} in stock',
                                             style: GoogleFonts.outfit(
                                               fontSize: 11,
                                               fontWeight: FontWeight.w700,

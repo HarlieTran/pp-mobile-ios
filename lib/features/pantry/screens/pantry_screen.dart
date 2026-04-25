@@ -81,6 +81,7 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
   String _selectedCategory = 'All';
   String _healthFilter = 'All';
   String _duration = 'Week';
+  int _displayCount = 5;
 
   @override
   void initState() {
@@ -149,6 +150,15 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
 
             return matchesSearch && matchesCategory && matchesHealth;
           }).toList();
+
+          inventoryItems.sort((a, b) {
+            if (a.expiryDate == null && b.expiryDate == null) return 0;
+            if (a.expiryDate == null) return 1;
+            if (b.expiryDate == null) return -1;
+            return a.expiryDate!.compareTo(b.expiryDate!);
+          });
+
+          final displayedItems = inventoryItems.take(_displayCount).toList();
 
           return RefreshIndicator(
             onRefresh: () => ref.read(pantryProvider.notifier).fetchItems(),
@@ -485,15 +495,15 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
                         ),
                       ),
                     )
-                  else
+                  else ...[
                     ListView.separated(
                       padding: const EdgeInsets.symmetric(horizontal: 24),
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: inventoryItems.length,
+                      itemCount: displayedItems.length,
                       separatorBuilder: (_, __) => const SizedBox(height: 12),
                       itemBuilder: (context, index) {
-                        final item = inventoryItems[index];
+                        final item = displayedItems[index];
                         String emoji = '🥫';
                         final name = item.rawName.toLowerCase();
                         if (name.contains('milk')) emoji = '🥛';
@@ -615,6 +625,25 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
                         );
                       },
                     ),
+                    if (_displayCount < inventoryItems.length)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 24),
+                        child: GestureDetector(
+                          onTap: () => setState(() => _displayCount += 5),
+                          behavior: HitTestBehavior.opaque,
+                          child: Center(
+                            child: Text(
+                              'Show more',
+                              style: GoogleFonts.outfit(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF9CA3AF),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
 
                   const SizedBox(height: 32),
                   Padding(

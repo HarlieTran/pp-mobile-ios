@@ -83,39 +83,82 @@ class _AiChefScreenState extends ConsumerState<AiChefScreen> with SingleTickerPr
     }
     if (_singleError != null) {
       return Scaffold(
-        appBar: AppBar(
-          leading: IconButton(icon: const Icon(LucideIcons.arrowLeft), onPressed: () => context.pop()),
-          title: const Text('AI Chef Error'),
-        ),
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(LucideIcons.alertTriangle, size: 64, color: AppColors.error),
-                const SizedBox(height: 16),
-                Text(
-                  'Failed to generate recipe.',
-                  style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold),
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: Stack(
+            children: [
+              Positioned(
+                top: 8,
+                left: 8,
+                child: IconButton(
+                  icon: const Icon(LucideIcons.arrowLeft, color: AppColors.textPrimary),
+                  onPressed: () => context.pop(),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  _singleError!,
-                  style: GoogleFonts.outfit(fontSize: 14, color: AppColors.textSecondary),
-                  textAlign: TextAlign.center,
+              ),
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(32.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(24),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFFFF7ED),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(LucideIcons.flame, size: 64, color: Color(0xFFEA580C)),
+                      ),
+                      const SizedBox(height: 32),
+                      Text(
+                        'Oops! The kitchen got too hot',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.outfit(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.textPrimary,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Our AI Chef needs a quick breather. Please try asking again.',
+                        style: GoogleFonts.outfit(fontSize: 16, color: AppColors.textSecondary),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 32),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 56,
+                        child: FilledButton(
+                          style: FilledButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          ),
+                          onPressed: () {
+                            if (_currentQuery != null) {
+                              _startGeneration(_currentQuery!);
+                            }
+                          },
+                          child: Text(
+                            'Try Again',
+                            style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      TextButton(
+                        onPressed: () => context.pop(),
+                        child: Text(
+                          'Go back',
+                          style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 24),
-                FilledButton(
-                  onPressed: () {
-                    if (_currentQuery != null) {
-                      _startGeneration(_currentQuery!);
-                    }
-                  },
-                  child: const Text('Try Again'),
-                )
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       );

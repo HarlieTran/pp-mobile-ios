@@ -69,7 +69,13 @@ class _ScanScreenState extends ConsumerState<ScanScreen>
 
       // Step 4: Navigate to review
       if (mounted) {
-        context.go('/pantry/scan/review', extra: parsedItems);
+        await context.push('/pantry/scan/review', extra: parsedItems);
+        if (mounted) {
+          setState(() {
+            _isProcessing = false;
+            _statusMessage = null;
+          });
+        }
       }
     } catch (e) {
       if (mounted) {

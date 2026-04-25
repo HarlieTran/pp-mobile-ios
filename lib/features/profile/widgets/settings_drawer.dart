@@ -126,6 +126,9 @@ class SettingsDrawer extends ConsumerWidget {
                         onTap: () async {
                           context.pop();
                           await ref.read(authProvider.notifier).signOut();
+                          if (context.mounted) {
+                            context.go('/login');
+                          }
                         },
                       ),
                     ),

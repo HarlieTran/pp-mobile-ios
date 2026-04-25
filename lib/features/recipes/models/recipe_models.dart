@@ -80,7 +80,7 @@ class Recipe {
       id: json['id'] as int,
       title: json['title'] as String,
       imageUrl: json['imageUrl'] as String? ?? json['image'] as String?,
-      readyInMinutes: json['readyInMinutes'] as int?,
+      readyInMinutes: (json['readyInMinutes'] ?? json['readyMinutes']) as int?,
       servings: json['servings'] as int?,
       isSaved: json['isSaved'] as bool? ?? false,
       source: json['source'] as String?,
