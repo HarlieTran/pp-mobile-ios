@@ -1,15 +1,16 @@
-name: Build iOS IPA
-
+name: Flutter iOS Build
 on:
   workflow_dispatch:
+  push:
+    branches: [ master ]
 
 jobs:
-  build:
+  build-ios:
     runs-on: macos-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -18,13 +19,15 @@ jobs:
           architecture: x64
 
       - name: Install dependencies
-        run: flutter pub get
+        run: |
+          flutter pub get
+          cd ios && pod install --repo-update
 
-      - name: Build iOS IPA (unsigned)
+      - name: Build iOS (unsigned IPA)
         run: flutter build ipa --no-codesign
 
       - name: Upload IPA artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: ios-build
+          name: ios-ipa
           path: build/ios/ipa/*.ipa
