@@ -96,10 +96,7 @@ class _ShoppingListScreenState extends ConsumerState<ShoppingListScreen> {
     for (final entry in requiredMap.entries) {
       final amounts = entry.value.toSet().toList();
       final amountStr = amounts.isNotEmpty ? amounts.join(' & ') : 'Some';
-      final inStock = pantryItems.any((p) {
-        final pName = p.rawName.toLowerCase();
-        return entry.key.contains(pName) || pName.contains(entry.key);
-      });
+      final inStock = pantryItems.any((p) => _isMatch(entry.key, p.rawName));
       allIngredients.add(_ShopItem(name: entry.key, amount: amountStr, inStock: inStock));
     }
 
@@ -568,6 +565,48 @@ class _ShoppingListScreenState extends ConsumerState<ShoppingListScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
+  }
+
+  bool _isMatch(String recipeIngredient, String pantryItemName) {
+    final a = recipeIngredient.toLowerCase().trim();
+    final b = pantryItemName.toLowerCase().trim();
+    if (a == b) return true;
+    if (a.contains(b) || b.contains(a)) return true;
+
+    String toSingular(String word) {
+      if (word.endsWith('ies')) return '${word.substring(0, word.length - 3)}y';
+      if (word.endsWith('oes')) return word.substring(0, word.length - 2);
+      if (word.endsWith('ses') || word.endsWith('xes') || word.endsWith('zes') || word.endsWith('ches') || word.endsWith('shes')) return word.substring(0, word.length - 2);
+      if (word.endsWith('s') && !word.endsWith('ss')) return word.substring(0, word.length - 1);
+      return word;
+    }
+
+    final singA = a.split(' ').map(toSingular).join(' ');
+    final singB = b.split(' ').map(toSingular).join(' ');
+    if (singA == singB) return true;
+    if (singA.contains(singB) || singB.contains(singA)) return true;
+
+    final stopWords = {'fresh', 'chopped', 'diced', 'minced', 'ground', 'extra', 'virgin', 'organic', 'large', 'small', 'medium', 'boneless', 'skinless', 'unsalted', 'salted', 'reduced', 'low', 'fat', 'to', 'taste'};
+    
+    List<String> tokenize(String text) {
+      return text.replaceAll(RegExp(r'[^a-z0-9\s]'), '').split(' ')
+          .map((e) => e.trim())
+          .where((e) => e.length > 1 && !stopWords.contains(e))
+          .toList();
+    }
+    
+    final ta = tokenize(singA);
+    final tb = tokenize(singB);
+    
+    if (ta.isEmpty || tb.isEmpty) return false;
+    
+    int overlap = 0;
+    for (final token in ta) {
+      if (tb.contains(token)) overlap++;
+    }
+    
+    final ratio = overlap / (ta.length > tb.length ? ta.length : tb.length);
+    return ratio >= 0.5;
   }
 
   String _capitalize(String s) => s.isEmpty ? s : '${s[0].toUpperCase()}${s.substring(1)}';
